@@ -1,0 +1,20 @@
+--- a/csps/lpc32xx/source/lpc32xx_slcnand_driver.c	2014-10-30 15:30:00.775265443 +0100
++++ b/csps/lpc32xx/source/lpc32xx_slcnand_driver.c	2014-10-30 15:28:48.623255843 +0100
+@@ -26,6 +26,7 @@
+ #include "lpc32xx_intc_driver.h"
+ #include "lpc_nandflash_params.h"
+ #include "lpc32xx_slcnand_driver.h"
++#include "lpc32xx_timer_driver.h"
+ #include "lpc_arm922t_cp15_driver.h"
+ 
+ /***********************************************************************
+@@ -1105,6 +1106,9 @@
+   slcnand_cmd(dev, NAND_CMD_RESET);
+   slcnand_wait_ready(dev);
+ 
++  /* Need to let more time pass to avoid ID read failure on fast NANDs */
++  timer_wait_ms(TIMER_CNTR0, 20);
++
+   ids = slcnand_identify_device(dev, devlist);
+   if (!ids)
+   {
