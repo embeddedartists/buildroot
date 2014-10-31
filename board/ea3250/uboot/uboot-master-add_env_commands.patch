@@ -1,0 +1,55 @@
+--- a/include/configs/ea3250.h	2012-03-26 13:02:47.000000000 +0200
++++ b/include/configs/ea3250.h	2013-05-02 09:56:31.536623422 +0200
+@@ -296,6 +299,34 @@
+ 	"nand write.jffs2 ${rootloadaddr} 0x00540000"		\
+ 	" ${rootloadsize}\0"
+ 
++/* Command to load root file system from USB and burn it into NAND FLASH */
++#define USBROOTTOFLASH "usbroottoflash="			\
++	"usb start;"						\
++	"fatload usb 0 ${rootloadaddr} ${rootfile};"		\
++	"usb stop;"						\
++	"setenv rootloadsize ${filesize};"			\
++	"run mtdrootburn\0"
++
++/* Command to load kernel from USB and burn it into NAND FLASH */
++#define USBKERNELTOFLASH "usbkerneltoflash="			\
++	"usb start;"						\
++	"fatload usb 0 ${loadaddr} uImage;"			\
++	"usb stop;"						\
++	"run mtdkernelburn\0"
++
++/* Command to load kernel and rootfs from USB and burn them into NAND FLASH */
++#define USBUPDATE "usb_update="					\
++	"run usbroottoflash;"					\
++	"run usbkerneltoflash;"					\
++	"reset\0"
++
++#define QUOTE_X(__x) #__x
++#define QUOTE(__x)  QUOTE_X(__x)
++/* Command to reset the u-boot environment */
++#define RESETENV "resetenv="					\
++	"nand erase " QUOTE(CONFIG_ENV_OFFSET) " " QUOTE(CONFIG_ENV_SIZE) ";"	\
++	"reset\0"
++
+ /*
+  * Other preset environment variables and example bootargs string
+  */
+@@ -313,11 +347,15 @@
+ 	TFTPSTATICROOTFSLOAD					\
+ 	TFTPDHCPROOTFSLOAD					\
+ 	RDROOTFSLOAD						\
+-	MTDROOTBURN
++	MTDROOTBURN						\
++	USBROOTTOFLASH						\
++	USBKERNELTOFLASH					\
++	USBUPDATE						\
++	RESETENV
+ 
+ /* Default boot command */
+ #define CONFIG_BOOTCOMMAND					\
+-	"run nfsboot;run tftpstatickernel; bootm ${loadaddr}"
++	"run mtdboot;run mtdkernel; bootm ${loadaddr}"
+ 
+ /*
+  * BOOTP options
